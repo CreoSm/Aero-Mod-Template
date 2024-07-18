@@ -52,6 +52,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#easing-styles">Easing Styles.</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-power-of-defining-your-own-player-option">The power of defining your own player option</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#mod-example-and-explanation">Mod Example And Explanation.</a>
     </li>
     </ul>
@@ -86,7 +88,7 @@
 <img alt="example" src="Example.png" title="" /></p>
 <p>Once you did that you can begin making your mod file, write your code within the mod function in <code>/lua/main.lua</code></p>
 <h2 id="global-variables">Global Variables</h2>
-<p>These are variables you can use throughout your mod chart, these are generally things that are used often but are annoying to initiate as a simple variable. AERO takes the lead and preinitiates these for easy access.</p>
+<p>These are variables you can use throughout your mod chart, these are generally things that are used often but are annoying to initiate as a simple variable. aero preinitiates these for easy access.</p>
 <ul>
 <li>
 <p><code>Actors</code> - A dictionary containing the actors defined using <code>Actors.xml</code></p>
@@ -200,6 +202,21 @@
 <li>outSine</li>
 <li>inOutSine</li>
 </ul>
+<h2 id="the-power-of-defining-your-own-player-option">The power of defining your own player option</h2>
+<p>As you may have seen in the function list, there is a function called <code>CreatePlayerOption</code> this is an extremely useful function because it lets you create a player option to ease the properties of something that is <strong>NOT</strong> a player option. For example, the notefield's position or rotation, so how do we do that? Well quite simple.</p>
+<pre><code>CreatePlayerOption(&quot;NotefieldX&quot;, function(value)
+    Notefield:x(value)
+end)
+</code></pre>
+<p>Easy right? We make a new player option called "NotefieldX" and we can now use ease on it to change the notefield's x position, except <em>smoothly</em> but wait, there's an issue.</p>
+<p>The notefield starts in the center of the screen but for some reason ease will make it start at the very left of the screen? The reason for that is new player options <strong>will always start at 0</strong>, but there's an easy fix.</p>
+<pre><code>CreatePlayerOption(&quot;NotefieldX&quot;, function(value)
+    Notefield:x(value)
+end)
+po_known_states.NotefieldX = Notefield:GetX()
+</code></pre>
+<p>With that set up, we can now smoothly ease the notefield's x position!</p>
+<p><code>ease(0, 1, outQuad, SCREEN_WIDTH/3, "NotefieldX")</code></p>
 <h2 id="mod-example-and-explanation">Mod Example And Explanation.</h2>
 <pre><code>function mod()
 ease(0, 2, outQuad, 1, &quot;Dark&quot;)
@@ -225,6 +242,22 @@ end
 </ul>
 <p>Overall we get this neat note explosion effect:
 <img alt="examplegif" src="example.gif" title="" /></p>
+<p>But this code seems bulky, I mean do we really need to say what beat we want the ease to be on? No we do not, well we can make it shorter.</p>
+<p>This is where <code>beatevent</code> comes in use.</p>
+<pre><code>function mod()
+
+function NoteExplosion(b)
+ease(b, 2, outQuad, 1, &quot;Dark&quot;)
+ease(b, 2, outQuad, 4, &quot;Drunk&quot;)
+ease(b, 2, outQuad, 7, &quot;Tipsy&quot;)
+ease(b, 2, outQuad, math.pi * 2, &quot;ConfusionOffset&quot;)
+end
+
+beatevent(0, NoteExplosion)
+
+end
+</code></pre>
+<p><code>beatevent</code> will call a function on whatever beat you specify with the beat it should be called on as a parameter, this lets you use the same ease functions on different beats. In this example it lets us reuse the note explosion effect seen above.</p>
               
             </div>
           </div><footer>
@@ -268,5 +301,5 @@ end
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-07-18 03:12:42.806951+00:00
+Build Date UTC : 2024-07-18 05:10:55.552071+00:00
 -->
