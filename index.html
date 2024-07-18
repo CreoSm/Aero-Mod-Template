@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>AERO Mod Template Documentation</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Aero mod template docs";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> AERO Mod Template Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Aero mod template docs</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-mod-chart">Setting Up A Mod Chart.</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#global-variables">Global Variables</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#global-functions">Global Functions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#defining-new-actors">Defining New Actors.</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#easing-styles">Easing Styles.</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mod-example-and-explanation">Mod Example And Explanation.</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">AERO Mod Template Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Aero mod template docs</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="aero-mod-template-docs">Aero mod template docs</h1>
+<h2 id="setting-up-a-mod-chart">Setting Up A Mod Chart.</h2>
+<p>To set up Aero place the /lua folder in your chart folder, then set the chart to change FG on the 0th beat to <code>/lua/AERO.lua</code>. You can do this in SMEditor using the edit timing button, like so:
+<img alt="example" src="Example.png" title="" /></p>
+<p>Once you did that you can begin making your mod file, write your code within the mod function in <code>/lua/main.lua</code></p>
+<h2 id="global-variables">Global Variables</h2>
+<p>These are variables you can use throughout your mod chart, these are generally things that are used often but are annoying to initiate as a simple variable. AERO takes the lead and preinitiates these for easy access.</p>
+<ul>
+<li>
+<p><code>Actors</code> - A dictionary containing the actors defined using <code>Actors.xml</code></p>
+</li>
+<li>
+<p><code>Notefield</code> - The Player1 notefield actor</p>
+</li>
+<li>
+<p><code>PlayerOptions</code> - The playeroptions actor. If you want to change player options use <code>ease</code> or <code>SetPlayerOption</code> else it will not change <code>po_known_states</code></p>
+</li>
+<li>
+<p><code>po_known_states</code> - A dictionary holding all the player options current values. This table is vital for easing as its used as the initial state of the player option. You can alter this table like so: <code>po_known_states["Mod"] = Value</code></p>
+</li>
+</ul>
+<h2 id="global-functions">Global Functions</h2>
+<p>Functions that provide all the functionality required in making a mod chart.</p>
+<ul>
+<li>
+<p><code>beatevent(x, func)</code> - Calls func on beat x with x as a parameter. Use this to run functions at specific beats.</p>
+</li>
+<li>
+<p><code>be(x, func)</code> - Alias to beatevent.</p>
+</li>
+<li>
+<p><code>GetCurrentBeat()</code> - Returns the current beat as a float.</p>
+</li>
+<li>
+<p><code>GetSongBeatsPerSecond()</code> - Returns beats per second.</p>
+</li>
+<li>
+<p><code>GetSongBeatsPerMinute()</code> - Returns beats per minute.</p>
+</li>
+<li>
+<p><code>BeatsToSeconds(x)</code> - Coverts the amount of beats to seconds. Useful for using the standard stepmania easing functions on actors.</p>
+</li>
+<li>
+<p><code>Lerp(a, b, t)</code> - Lerp a to value b with t as percent (between 0 and 1)</p>
+</li>
+<li>
+<p><code>ease(x, t, easingstyle, value, mod)</code> - Probably the most essential function in this list. Ease will interpolate the player mod 'mod' on beat x to value using easing style as the style.</p>
+</li>
+<li>
+<p><code>CreateFrameEvent(func)</code> - Aero will run f every frame (with no parameters) until the function returns 1 or true.</p>
+</li>
+<li>
+<p><code>CreatePlayerOption(Name, func)</code> - Defines a new player option as Name, which you can then use ease to alter. Note that the default value of this player option will be 0, if you want to change this look at <code>po_known_states</code></p>
+</li>
+<li>
+<p><code>SetPlayerOption(Option, Value)</code> - Sets the player option to value.</p>
+</li>
+<li>
+<p><code>SetDefaultPlayerOptions()</code> - Sets every player option supported by aero to 0, except for MMod and CMod which are set to 550, note the final result will be CMod.</p>
+</li>
+</ul>
+<h2 id="defining-new-actors">Defining New Actors.</h2>
+<p>Aero uses a file called <code>Actors.xml</code> to create new actors in the mod chart, since this is an XML file you can initiate actors within each other, creating an easy way to keep track of what is layered and where. Note that actors defined after each other will be <strong>over</strong> the previous layer. All actors will be placed within the dictionary <code>Actors</code> which you can then refrence using their name, like so: <code>Actors.MyCoolSprite</code> or <code>Actors["MyCoolSprite"]</code></p>
+<p>You can also set properties of an actor within this file, here is an example:</p>
+<pre><code>return [[
+&lt;ActorFrame Name=&quot;MainActorFrame&quot;&gt;
+&lt;Sprite Name=&quot;MyCoolSprite&quot; Texture=&quot;/lua/sprites/bg.png&quot;&gt;&lt;/Sprite&gt;
+&lt;/ActorFrame&gt;
+]]
+</code></pre>
+<p>This example will create a Sprite with the texture <code>/lua/sprites/bg.png</code> within an ActorFrame.</p>
+<p>You can also call Fullscreen() and Center() using the Actors.xml like so:</p>
+<pre><code>&lt;Sprite Name=&quot;MyCoolSprite&quot; Texture=&quot;/lua/sprites/bg.png&quot; Center=&quot;true&quot; FullScreen=&quot;true&quot;&gt;&lt;/Sprite&gt;
+</code></pre>
+<h2 id="easing-styles">Easing Styles.</h2>
+<p>Here is a list of every easing style you can use with <code>ease</code></p>
+<ul>
+<li>bounce</li>
+<li>trie</li>
+<li>pop</li>
+<li>tap</li>
+<li>pulse</li>
+<li>spike</li>
+<li>inverse</li>
+<li>instant</li>
+<li>linear</li>
+<li>inQuad</li>
+<li>outQuad</li>
+<li>inOutQuad</li>
+<li>inCubic</li>
+<li>outCubic</li>
+<li>inOutCubic</li>
+<li>inQuart</li>
+<li>outQuart</li>
+<li>inOutQuart</li>
+<li>inQuint</li>
+<li>outQuint</li>
+<li>inOutQuint</li>
+<li>inExpo</li>
+<li>outExpo</li>
+<li>inOutExpo</li>
+<li>inCirc</li>
+<li>outCirc</li>
+<li>inOutCirc</li>
+<li>inElastic</li>
+<li>outElastic</li>
+<li>inOutElastic</li>
+<li>inBack</li>
+<li>outBack</li>
+<li>inOutBack</li>
+<li>inBounce</li>
+<li>outBounce</li>
+<li>inOutBounce</li>
+<li>inBounce</li>
+<li>outBounce</li>
+<li>inOutBounce</li>
+<li>inSine</li>
+<li>outSine</li>
+<li>inOutSine</li>
+</ul>
+<h2 id="mod-example-and-explanation">Mod Example And Explanation.</h2>
+<pre><code>function mod()
+ease(0, 2, outQuad, 1, &quot;Dark&quot;)
+ease(0, 2, outQuad, 4, &quot;Drunk&quot;)
+ease(0, 2, outQuad, 7, &quot;Tipsy&quot;)
+ease(0, 2, outQuad, math.pi * 2, &quot;ConfusionOffset&quot;)
+end
+</code></pre>
+<p>So, what does this code do? Well we've got 4 ease functions on beat 0 each taking 2 beats.</p>
+<ul>
+<li>
+<p>Dark sets the receptors opacity to 0 making them invisible.</p>
+</li>
+<li>
+<p>Drunk begins moving the receptors left and right.</p>
+</li>
+<li>
+<p>Tipsy makes the receptors sway up and down in a wave.</p>
+</li>
+<li>
+<p>ConfusionOffset rotates the receptors 360 degrees.</p>
+</li>
+</ul>
+<p>Overall we get this neat note explosion effect:
+<img alt="examplegif" src="example.gif" title="" /></p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.0
+Build Date UTC : 2024-07-18 03:10:22.678952+00:00
+-->
