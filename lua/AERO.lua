@@ -7,6 +7,11 @@
 local aero = {}
 local BeatEvents = { { 9999999, function() end } }
 local modsfile = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/main.lua")()
+local xml = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/xmlSimple.lua")().newParser() -- https://github.com/Cluain/Lua-Simple-XML-Parser
+local ActorsXML = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/Actors.xml")()
+local acxml = xml:ParseXmlText(ActorsXML)
+
+_G.Actors = {}
 
 _G.Notefield = nil
 aero.FrameEvents = {}
@@ -34,6 +39,7 @@ _G.Lerp = function(a, b, t)
 end
 
 _G.ActorFrame = Def["ActorFrame"]
+local initactor = nil
 
 _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
     InitCommand = function(self)
@@ -43,7 +49,7 @@ _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
     OnCommand = function(self)
         for i, v in pairs(SCREENMAN:GetTopScreen():GetChildren()) do
             if i ~= "PlayerP1" and v ~= self:GetParent() then
-                v:diffuse(1, 1, 1, 0)
+                --v:diffuse(1, 1, 1, 0)
             end
         end
     end,
@@ -77,6 +83,31 @@ _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
         end
     },
 }
+
+initactor = function(acxml, parent)
+    for i, v in pairs(acxml:children()) do -- Initiate xml actors
+        local new_actor = Def[v:name()] {  -- Create a new actor of type v:name()
+            InitCommand = function(self)
+                _G.Actors[v["@Name"]] = self
+            end
+        }
+        for i, v in pairs(v) do                -- Fill in the actors properties
+            if string.sub(i, 1, 1) == "@" then -- Is a set property
+                local propertyname = string.sub(i, 2, string.len(i))
+                if propertyname == "Name" then print(v) end
+                if propertyname == "Texture" then
+                    v = GAMESTATE:GetCurrentSong():GetSongDir() .. v
+                end
+                new_actor[propertyname] = v
+            end
+        end
+        parent[#parent + 1] = new_actor
+        initactor(v, new_actor)
+    end
+end
+initactor(acxml, frame)
+
+
 
 _G.beatevent = function(Beat, Function) -- Runs function on specified beat. With the beat it should be initialized on as a parameter.
     table.insert(BeatEvents, { Beat, Function })
@@ -121,16 +152,16 @@ local po_list = {
     "Blink",
     "Boomerang",
     "Boost",
-    --"Bounce",
+    "Bounce",
     "Brake",
     "Bumpy",
     "Centered",
     "Confusion",
     "Cross",
     "Dark",
-    --"Digital",
+    "Digital",
     "Hidden",
-    --"DrawSize",
+    "DrawSize",
     "Expand",
     "Flip",
     "Hallway",
@@ -139,7 +170,8 @@ local po_list = {
     "Invert",
     "Split",
     "Reverse",
-    "Blacksphere"
+    "Blacksphere",
+    "NotePath"
 }
 function addcolvar(option)
     for i = 1, 16 do
@@ -157,7 +189,7 @@ addcolvar("MoveZ")
 
 
 
-local po_known_states = {} -- for keeping track of what effects are currently at
+_G.po_known_states = {} -- for keeping track of what effects are currently at
 for i, po in pairs(po_list) do
     po_known_states[po] = 0
 end
@@ -199,7 +231,7 @@ CreatePlayerOption("Blacksphere", function(rot) -- From mod chart "blacksphere",
 end)
 
 function SetPlayerOption(Option, value) -- Does exactly as it says
-    pcall(function()
+    pcall(function()                    -- Some player effects are not available between all stepmania versions, so just ignore the errors to keep going.
         po_known_states[Option] = value
         if not NewPlayerOptions[Option] then
             PlayerOptions[Option](PlayerOptions, value, 9999)
@@ -242,7 +274,7 @@ _G.ease = function(when, time_in_beats, easingstyle, value, player_effect) -- ea
                 TweenInitialValues[player_effect] = nil
                 return_val = true
             end
-            SetPlayerOption(player_effect, Lerp(Initval, value, percent))
+            SetPlayerOption(player_effect, Lerp(Initval, value, easingstyle(percent)))
         else
             Initval = po_known_states[player_effect]
         end

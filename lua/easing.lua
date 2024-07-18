@@ -164,7 +164,7 @@ end
 
 function ease_styles.inBounce(t) return 1 - ease_styles.outBounce(1 - t) end
 
-function ease_styles.vinOutBounce(t)
+function ease_styles.inOutBounce(t)
     if t < 0.5 then
         return ease_styles.inBounce(t * 2) * 0.5
     else
