@@ -1,4 +1,7 @@
 -- Aero mod template by creo. --
+------------------------------------------
+-- https://github.com/Vezxe/Aero-Mod-Template
+------------------------------------------
 
 ------------------------------------------
 -- Do not write here, write in main.lua --
@@ -15,6 +18,7 @@ _G.Actors = {}
 
 _G.Notefield = nil
 aero.FrameEvents = {}
+aero.easingevents = {}
 
 _G.PlayerOptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions('ModsLevel_Song')
 
@@ -69,6 +73,13 @@ _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
                 table.remove(aero.FrameEvents, i)
             end
         end
+
+        local index = 1
+        for i, v in pairs(aero.easingevents) do
+            if v[2](v[1]) then
+                aero.easingevents[i] = nil
+            end
+        end
     end,
     Def.ActorProxy {
         OnCommand = function(self)
@@ -86,26 +97,50 @@ _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
 
 initactor = function(acxml, parent)
     for i, v in pairs(acxml:children()) do -- Initiate xml actors
-        local new_actor = Def[v:name()] {  -- Create a new actor of type v:name()
+        local dothings = {}
+        local ActorType = v:name()
+        local new_actor = Def[ActorType] { -- Create a new actor of type v:name()
             InitCommand = function(self)
-                _G.Actors[v["@Name"]] = self
+                pcall(function()
+                    if v["@Name"] then
+                        _G.Actors[v["@Name"]] = self
+                    end
+                end)
+
+                for x, Func in pairs(dothings) do
+                    if Func == "FullScreen" then -- Doing this rather than fullscreen in reality to stop ActorFrames from freaking the fuck out
+                        self:SetWidth(SCREEN_WIDTH):SetHeight(SCREEN_HEIGHT)
+                    else
+                        self[Func](self)
+                    end
+                end
             end
         }
+
         for i, v in pairs(v) do                -- Fill in the actors properties
             if string.sub(i, 1, 1) == "@" then -- Is a set property
                 local propertyname = string.sub(i, 2, string.len(i))
-                if propertyname == "Name" then print(v) end
-                if propertyname == "Texture" then
+
+                local lowv = string.lower(v)
+
+                if propertyname == "Texture" or propertyname == "Frag" then
                     v = GAMESTATE:GetCurrentSong():GetSongDir() .. v
                 end
-                new_actor[propertyname] = v
+
+                if propertyname == "FullScreen" or propertyname == "Center" then
+                    if lowv == "true" then
+                        table.insert(dothings, propertyname)
+                    end
+                else
+                    new_actor[propertyname] = v
+                end
             end
         end
         parent[#parent + 1] = new_actor
         initactor(v, new_actor)
     end
 end
-initactor(acxml, frame)
+initactor(acxml, frame) -- Initiate actors from xml
 
 
 
@@ -127,6 +162,14 @@ _G.beatevent = function(Beat, Function) -- Runs function on specified beat. With
     BeatEvents = new_beat_events
 end
 _G.be = _G.beatevent
+
+_G.beateventcount = function(BeatStart, BeatEnd, nth, func)
+    for i = BeatStart, BeatEnd - 1 do
+        for v = 0, nth - 1 do
+            be(i + ((1 / nth) * v), func)
+        end
+    end
+end
 
 _G.CreateFrameEvent = function(func) -- Call a function on every frame, if you want to stop the function return 1 or true.
     table.insert(aero.FrameEvents, func)
@@ -171,7 +214,8 @@ local po_list = {
     "Split",
     "Reverse",
     "Blacksphere",
-    "NotePath"
+    "NotePath",
+    "Mini",
 }
 function addcolvar(option)
     for i = 1, 16 do
@@ -253,32 +297,24 @@ end
 
 SetDefaultPlayerOptions()
 
-local TweenInitialValues = {}
+local CurrentEasingData = {}
 
 _G.ease = function(when, time_in_beats, easingstyle, value, player_effect) -- eases a player effect within an amount of beats
-    CreateFrameEvent(function()
+    local easf = nil
+    easf = function(Initval)
         local return_val = false
         if CurrentSongBeat >= when then
-            local Initval = nil
-
-            if TweenInitialValues[player_effect] then
-                Initval = TweenInitialValues[player_effect]
-            else
-                TweenInitialValues[player_effect] = po_known_states[player_effect]
-                Initval = TweenInitialValues[player_effect]
-            end
-
             local percent = (1 / time_in_beats) * (CurrentSongBeat - when)
             if percent >= 1 then
                 percent = 1
-                TweenInitialValues[player_effect] = nil
                 return_val = true
             end
             SetPlayerOption(player_effect, Lerp(Initval, value, easingstyle(percent)))
-        else
-            Initval = po_known_states[player_effect]
         end
         return return_val
+    end
+    beatevent(when, function(b)
+        aero.easingevents[player_effect] = { po_known_states[player_effect], easf }
     end)
 end
 
