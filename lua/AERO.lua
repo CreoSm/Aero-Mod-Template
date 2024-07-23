@@ -11,7 +11,11 @@ local aero = {}
 local BeatEvents = { { 9999999, function() end } }
 local modsfile = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/main.lua")()
 local xml = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/xmlSimple.lua")().newParser() -- https://github.com/Cluain/Lua-Simple-XML-Parser
-local ActorsXML = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/Actors.xml")()
+
+local file = RageFileUtil.CreateRageFile()
+file:Open(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/Actors.xml", 1)
+local ActorsXML = file:Read()
+
 local acxml = xml:ParseXmlText(ActorsXML)
 
 _G.Actors = {}
@@ -122,9 +126,8 @@ initactor = function(acxml, parent)
                 local propertyname = string.sub(i, 2, string.len(i))
 
                 local lowv = string.lower(v)
-                local pn = propertyname
 
-                if pn == "Texture" or pn == "Frag" or pn == "Materials" or pn == "Bones" or pn == "Meshes" then
+                if propertyname == "Texture" or propertyname == "Frag" then
                     v = GAMESTATE:GetCurrentSong():GetSongDir() .. v
                 end
 
