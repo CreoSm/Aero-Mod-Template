@@ -127,7 +127,8 @@ initactor = function(acxml, parent)
 
                 local lowv = string.lower(v)
 
-                if propertyname == "Texture" or propertyname == "Frag" then
+                local pn = propertyname
+                if pn == "Texture" or pn == "Frag" or pn == "Materials" or pn == "Bones" or pn == "Meshes" then
                     v = GAMESTATE:GetCurrentSong():GetSongDir() .. v
                 end
 
