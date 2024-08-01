@@ -1,4 +1,4 @@
-module(..., package.seeall)
+--module(..., package.seeall)
 
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
@@ -18,13 +18,12 @@ module(..., package.seeall)
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 function newParser()
-
     XmlParser = {};
 
     function XmlParser:ToXmlString(value)
-        value = string.gsub(value, "&", "&amp;"); -- '&' -> "&amp;"
-        value = string.gsub(value, "<", "&lt;"); -- '<' -> "&lt;"
-        value = string.gsub(value, ">", "&gt;"); -- '>' -> "&gt;"
+        value = string.gsub(value, "&", "&amp;");   -- '&' -> "&amp;"
+        value = string.gsub(value, "<", "&lt;");    -- '<' -> "&lt;"
+        value = string.gsub(value, ">", "&gt;");    -- '>' -> "&gt;"
         value = string.gsub(value, "\"", "&quot;"); -- '"' -> "&quot;"
         value = string.gsub(value, "([^%w%&%;%p%\t% ])",
             function(c)
@@ -78,8 +77,8 @@ function newParser()
                 local lNode = newNode(label)
                 self:ParseArgs(lNode, xarg)
                 table.insert(stack, lNode)
-		top = lNode
-            else -- end tag
+                top = lNode
+            else                                    -- end tag
                 local toclose = table.remove(stack) -- remove top
 
                 top = stack[#stack]
@@ -129,11 +128,17 @@ function newNode(name)
     node.___props = {}
 
     function node:value() return self.___value end
+
     function node:setValue(val) self.___value = val end
+
     function node:name() return self.___name end
+
     function node:setName(name) self.___name = name end
+
     function node:children() return self.___children end
+
     function node:numChildren() return #self.___children end
+
     function node:addChild(child)
         if self[child:name()] ~= nil then
             if type(self[child:name()].name) == "function" then
@@ -149,7 +154,9 @@ function newNode(name)
     end
 
     function node:properties() return self.___props end
+
     function node:numProperties() return #self.___props end
+
     function node:addProperty(name, value)
         local lName = "@" .. name
         if self[lName] ~= nil then
@@ -167,3 +174,5 @@ function newNode(name)
 
     return node
 end
+
+return _G
