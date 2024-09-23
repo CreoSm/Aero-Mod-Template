@@ -154,11 +154,9 @@
 <h2 id="defining-new-actors">Defining New Actors.</h2>
 <p>Aero uses a file called <code>Actors.xml</code> to create new actors in the mod chart, since this is an XML file you can initiate actors within each other, creating an easy way to keep track of what is layered and where. Note that actors defined after each other will be <strong>over</strong> the previous layer. All actors will be placed within the dictionary <code>Actors</code> which you can then refrence using their name, like so: <code>Actors.MyCoolSprite</code> or <code>Actors["MyCoolSprite"]</code></p>
 <p>You can also set properties of an actor within this file, here is an example:</p>
-<pre><code>return [[
-&lt;ActorFrame Name=&quot;MainActorFrame&quot;&gt;
+<pre><code>&lt;ActorFrame Name=&quot;MainActorFrame&quot;&gt;
 &lt;Sprite Name=&quot;MyCoolSprite&quot; Texture=&quot;/lua/sprites/bg.png&quot;&gt;&lt;/Sprite&gt;
 &lt;/ActorFrame&gt;
-]]
 </code></pre>
 <p>This example will create a Sprite with the texture <code>/lua/sprites/bg.png</code> within an ActorFrame.</p>
 <p>You can also call Fullscreen() and Center() using the Actors.xml like so:</p>
@@ -347,5 +345,5 @@ end
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-07-18 05:28:33.122114+00:00
+Build Date UTC : 2024-09-23 04:26:58.779524+00:00
 -->
