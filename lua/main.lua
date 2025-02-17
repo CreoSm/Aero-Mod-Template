@@ -1,9 +1,8 @@
-local mod = function()
-    --Put your code here --
-end
+-- Put your mod file code here --
+-- For documentation read https://creosm.github.io/Aero-Mod-Template/ --
 
--- DO NOT TOUCH --
-return function(env)
-    setfenv(1, env)
-    mod()
-end
+-- Example --
+beatevent(2,function ()
+	SetPlayerOption("CMod", 500)
+end)
+-- The above code sets the players scrollspeed to CMod 500 on beat 2. --

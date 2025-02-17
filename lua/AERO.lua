@@ -1,7 +1,7 @@
--- Aero mod template by creo. --
-------------------------------------------
--- https://github.com/CreoSm/Aero-Mod-Template
-------------------------------------------
+-- Aero mod template by CreoSM. --
+------------------------------------------------
+-- https://github.com/CreoSm/Aero-Mod-Template--
+------------------------------------------------
 
 ------------------------------------------
 -- Do not write here, write in main.lua --
@@ -9,7 +9,8 @@
 
 local aero = {}
 local BeatEvents = { { 9999999, function() end } }
-local modsfile = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/main.lua")()
+local TimeEvents = { { 9999999, function() end } }
+local modsfile = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/main.lua")
 local xml = loadfile(GAMESTATE:GetCurrentSong():GetSongDir() .. "/lua/xmlSimple.lua")().newParser() -- https://github.com/Cluain/Lua-Simple-XML-Parser
 
 local file = RageFileUtil.CreateRageFile()
@@ -71,6 +72,10 @@ _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
             BeatEvents[1][2](BeatEvents[1][1])
             table.remove(BeatEvents, 1)
         end
+	if TimeEvents[1][1] <= CurrentSongTime then
+            TimeEvents[1][2](TimeEvents[1][1])
+            table.remove(TimeEvents, 1)
+        end
         for i, func in pairs(aero.FrameEvents) do
             local x = func()
             if x then
@@ -88,7 +93,8 @@ _G.frame = ActorFrame { -- IMPORTANT, DO NOT TOUCH!!
     Def.ActorProxy {
         OnCommand = function(self)
             _G.Notefield = SCREENMAN:GetTopScreen():GetChild('PlayerP1'):GetChild('NoteField')
-            modsfile(_G) -- run the user's code
+	    setfenv(modsfile, _G) -- Give modfile access to the environment we have here
+            modsfile() -- run the user's code
         end
     },
     Def.Actor {
@@ -167,6 +173,27 @@ _G.beatevent = function(Beat, Function) -- Runs function on specified beat. With
     BeatEvents = new_beat_events
 end
 _G.be = _G.beatevent
+
+
+_G.timeevent = function(Time, Function) -- Runs function on specified time. With the time it should be initialized on as a parameter.
+    table.insert(TimeEvents, { Time, Function })
+    local new_time_events = {}
+    while #TimeEvents ~= 0 do
+        local smallest_time = TimeEvents[1][1]
+        local index = 1
+        for i, v in pairs(TimeEvents) do
+            if v[1] < smallest_time then
+                smallest_time = v[1]
+                index = i
+            end
+        end
+        table.insert(new_time_events, TimeEvents[index])
+        table.remove(TimeEvents, index)
+    end
+    TimeEvents = new_time_events
+end
+_G.te = _G.timeevent
+
 
 _G.beateventcount = function(BeatStart, BeatEnd, nth, func)
     for i = BeatStart, BeatEnd - 1 do
@@ -300,10 +327,6 @@ function SetDefaultPlayerOptions() -- Set all "known" player options to their de
     SetPlayerOption("CMod", 550)
 end
 
-SetDefaultPlayerOptions()
-
-local CurrentEasingData = {}
-
 _G.ease = function(when, time_in_beats, easingstyle, value, player_effect) -- eases a player effect within an amount of beats
     local easf = nil
     easf = function(Initval)
@@ -326,6 +349,5 @@ end
 InsertActor = function(actor)
     frame[#frame + 1] = actor
 end
-
 -- End fuckery --
 return frame
