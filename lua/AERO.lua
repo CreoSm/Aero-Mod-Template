@@ -1,6 +1,6 @@
 -- Aero mod template by creo. --
 ------------------------------------------
--- https://github.com/Vezxe/Aero-Mod-Template
+-- https://github.com/CreoSm/Aero-Mod-Template
 ------------------------------------------
 
 ------------------------------------------
