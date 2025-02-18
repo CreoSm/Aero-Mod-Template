@@ -59,11 +59,15 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#global-variables" class="nav-link">Global Variables</a>
+            <li class="nav-item" data-bs-level="2"><a href="#useful-global-variables" class="nav-link">Useful Global Variables</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-bs-level="2"><a href="#global-functions" class="nav-link">Global Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#actor-functions" class="nav-link">Actor Functions</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -94,9 +98,9 @@
 <h2 id="setting-up-a-mod-chart">Setting Up A Mod Chart.</h2>
 <p>To set up Aero place the /lua folder in your chart folder, then set the chart to change FG on the 0th beat to <code>/lua/AERO.lua</code>. You can do this in SMEditor using the edit timing button, like so:
 <img alt="example" src="Example.png" title="" /></p>
-<p>Once you did that you can begin making your mod file, write your code within the mod function in <code>/lua/main.lua</code></p>
-<h2 id="global-variables">Global Variables</h2>
-<p>These are variables you can use throughout your mod chart, these are generally things that are used often but are annoying to initiate as a simple variable. aero preinitiates these for easy access.</p>
+<p>Once you did that you can begin making your mod file, write your code within <code>/lua/main.lua</code></p>
+<h2 id="useful-global-variables">Useful Global Variables</h2>
+<p>These are variables you can use throughout your mod chart.</p>
 <ul>
 <li>
 <p><code>Actors</code> - A dictionary containing the actors defined using <code>Actors.xml</code></p>
@@ -110,6 +114,18 @@
 <li>
 <p><code>po_known_states</code> - A dictionary holding all the player options current values. This table is vital for easing as its used as the initial state of the player option. You can alter this table like so: <code>po_known_states["Mod"] = Value</code></p>
 </li>
+<li>
+<p><code>SCREEN_WIDTH</code> - Self explanatory</p>
+</li>
+<li>
+<p><code>SCREEN_HEIGHT</code> - Self explanatory</p>
+</li>
+<li>
+<p><code>CurrentSongTime</code> - The current song time as a floating point in seconds.</p>
+</li>
+<li>
+<p><code>CurrentSongBeat</code> - The current song beat as a floating point.</p>
+</li>
 </ul>
 <h2 id="global-functions">Global Functions</h2>
 <p>Functions that provide all the functionality required in making a mod chart.</p>
@@ -119,6 +135,12 @@
 </li>
 <li>
 <p><code>be(x, func)</code> - Alias to beatevent.</p>
+</li>
+<li>
+<p><code>timeevent(t, func)</code> - Same as beatevent but rather than run on a beat it will call the function at a specific time. Intended to be used to call functions during 'stops' in charts, as the beat value wont continue until the stop is done.</p>
+</li>
+<li>
+<p><code>te(t, func)</code> - Alias to timeevent.</p>
 </li>
 <li>
 <p><code>GetCurrentBeat()</code> - Returns the current beat as a float.</p>
@@ -149,6 +171,34 @@
 </li>
 <li>
 <p><code>SetDefaultPlayerOptions()</code> - Sets every player option supported by aero to 0, except for MMod and CMod which are set to 550, note the final result will be CMod.</p>
+</li>
+</ul>
+<h2 id="actor-functions">Actor Functions</h2>
+<p>Functions that can be called on actors that are useful to know when making mod charts. There are many more of these and this list may be expanded upon in the future. If you want to see more Actor functions check out <a href="https://quietly-turning.github.io/Lua-For-SM5/LuaAPI?engine=StepMania&amp;version=5.1%20(dev)#Actors">this very useful page by quietly-turning</a></p>
+<ul>
+<li>
+<p><code>Actor:x(pos)</code> - Changes the actor's x position.</p>
+</li>
+<li>
+<p><code>Actor:y(pos)</code> - Changes the actor's y position.</p>
+</li>
+<li>
+<p><code>Actor:z(pos)</code> - Changes the actor's z position.</p>
+</li>
+<li>
+<p><code>Actor:Width(Size)</code> - Changes the actor's width.</p>
+</li>
+<li>
+<p><code>Actor:Height(Size)</code> - Changes the actor's height.</p>
+</li>
+<li>
+<p><code>Actor:rotationx(rot)</code> - Changes the x rotation.</p>
+</li>
+<li>
+<p><code>Actor:rotationy(rot)</code> - Changes the y rotation.</p>
+</li>
+<li>
+<p><code>Actor:rotationz(rot)</code> - Changes the z rotation.</p>
 </li>
 </ul>
 <h2 id="defining-new-actors">Defining New Actors.</h2>
@@ -224,12 +274,10 @@ po_known_states.NotefieldX = Notefield:GetX()
 <p>With that set up, we can now smoothly ease the notefield's x position!</p>
 <p><code>ease(0, 1, outQuad, SCREEN_WIDTH/3, "NotefieldX")</code></p>
 <h2 id="mod-example-and-explanation">Mod Example And Explanation.</h2>
-<pre><code>function mod()
-ease(0, 2, outQuad, 1, &quot;Dark&quot;)
+<pre><code>ease(0, 2, outQuad, 1, &quot;Dark&quot;)
 ease(0, 2, outQuad, 4, &quot;Drunk&quot;)
 ease(0, 2, outQuad, 7, &quot;Tipsy&quot;)
 ease(0, 2, outQuad, math.pi * 2, &quot;ConfusionOffset&quot;)
-end
 </code></pre>
 <p>So, what does this code do? Well we've got 4 ease functions on beat 0 each taking 2 beats.</p>
 <ul>
@@ -250,9 +298,7 @@ end
 <img alt="examplegif" src="example.gif" title="" /></p>
 <p>But this code seems bulky, I mean do we really need to say what beat we want the ease to be on? No we do not, well we can make it shorter.</p>
 <p>This is where <code>beatevent</code> comes in use.</p>
-<pre><code>function mod()
-
-function NoteExplosion(b)
+<pre><code>function NoteExplosion(b)
 ease(b, 2, outQuad, 1, &quot;Dark&quot;)
 ease(b, 2, outQuad, 4, &quot;Drunk&quot;)
 ease(b, 2, outQuad, 7, &quot;Tipsy&quot;)
@@ -260,8 +306,6 @@ ease(b, 2, outQuad, math.pi * 2, &quot;ConfusionOffset&quot;)
 end
 
 beatevent(0, NoteExplosion)
-
-end
 </code></pre>
 <p><code>beatevent</code> will call a function on whatever beat you specify with the beat it should be called on as a parameter, this lets you use the same ease functions on different beats. In this example it lets us reuse the note explosion effect seen above.</p></div>
             </div>
@@ -344,6 +388,6 @@ end
 </html>
 
 <!--
-MkDocs version : 1.6.0
-Build Date UTC : 2024-09-23 04:26:58.779524+00:00
+MkDocs version : 1.6.1
+Build Date UTC : 2025-02-18 00:31:20.296368+00:00
 -->
